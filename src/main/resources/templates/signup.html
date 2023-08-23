@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookVerse</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="CSS/index.css">
+    <link rel="stylesheet" href="CSS/login.css">
+
+</head>
+<body>
+    <nav class="navbar-1" style="position: sticky;top: 0; left: 0; display: flex;" >
+        <div class="container" style="margin-top: 5px;">
+            <a class="navbar-brand" href="index.html">
+            <img src="Images/bookverse.png" alt="Bootstrap" width="150px">
+            </a>
+        </div>
+
+        <div class="header">
+            <input type="text" class="search-box" placeholder="Search">
+            <div class="user-space">
+                <!-- <div class="user-space-item" id="profile">
+                    <div class="user-space-name">Profile</div>
+                    <div class="dropdown-menu">Profile</div>
+                </div> -->
+                <div class="wishlist user-space-item">
+                    <div class="user-space-name" onclick=wishListPage()>Wishlist</div>
+                </div>
+                <div class="cart user-space-item">
+                    <div class="user-space-name" onclick=cartPage()>Cart</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <form id="signup-form">
+        <section class="login-form">
+            <div id="signup-label-label">SIGNUP</div>
+    
+            <div class="form-element">
+                <span id="span1">+91</span>
+                <input type="text" name="mob-num" id="mob-num" placeholder="Contact Number">
+                <div class="error" id="contact-error">Length should be 10 digits</div>
+
+                <input type="text" name="full-name" id="full-name" placeholder="Full Name">
+                <div class="error" id="name-error">Enter full name</div>
+
+                <input type="text" name="email" id="email" placeholder="Email">
+                <div class="error" id="email-error">Invalid email</div>
+
+                <!-- <span id="span2">+91</span> -->
+                <input type="text" name="alt-mob-num" id="alt-mob-num" placeholder="Alternate Cotact Number">
+                <div class="error" id="alt-contact-error">Length should be 10 digits</div>
+            </div>
+
+            <div id="terms">
+                By continuing, I agree to the <span>Terms of Use</span> & <span>Privacy Policy</span>
+            </div>
+            <div style="width: 80%; margin: auto;">
+                <button id="cnt-btn" type="submit">CONTINUE</button>
+                <!-- <a href="signing-up.html" style="display: none;" id="signing-up-link"></a> -->
+            </div>
+            <div id="login-btn">
+                <span>already have an account?</span><a href="login">LOGIN</a>
+            </div>
+            
+        </section>
+    </form>
+
+
+    <form id="pass-form" style="margin-top: 60px;">
+        <section class="login-form">
+            <div id="signup-label">SET PASSWORD</div>
+    
+            <div class="form-element">
+                <input type="password" name="password1" id="pass-field-one" placeholder="Enter Password">
+                <div class="pass-error" id="pass-error1"></div>
+
+                <input type="password" name="password2" id="pass-field-two" placeholder="Confirm Password">
+                <div class="pass-error" id="pass-error2"></div>
+            </div>
+
+            <div id="pass-terms">
+                <span>Password must contain</span>
+                <div>
+                    <ul>
+                        <li  id="8-char">Length should be minimum 8 charachter</li>
+                        <li  id="uppercase">Atleast one uppercase charachter</li>
+                        <li  id="lowercase">Atleast one lowercase charachter</li>
+                        <li  id="one-num">Atleast one number</li>
+                        <li  id="special-char">Atleast one special charachter</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="width: 80%; margin: auto;">
+                <button id="set-pass-btn" type="submit" >CONTINUE</button>
+            </div>
+        </section>
+    </form>
+
+    <script src="JS/signup.js" type="text/javascript"></script>
+</body>
+</html>
