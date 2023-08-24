@@ -276,7 +276,7 @@ function storeData() {
     }
     console.log(myObj);
 
-    fetch("/signup", {
+    fetch("/api/signup", {
         method : 'POST',
         body: JSON.stringify(myObj),
         headers: {
@@ -290,6 +290,8 @@ function storeData() {
         console.error('Error submitting data:', error);
     });
     console.log("Success signup");
+    sessionStorage.setItem("currentUser", contactNum);
     location.assign("/");
+
 
 }

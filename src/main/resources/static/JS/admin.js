@@ -1,5 +1,6 @@
 let addForm = document.getElementById("add-item-form");
 
+
 let itemTitle = document.getElementById("item-title").value;
 let authorName  = document.getElementById("author-name").value;
 let storeName = document.getElementById("store-name").value;
@@ -10,32 +11,36 @@ let description = document.getElementById("description").value;
 
 const fileInput = document.getElementById("file-input");
 
-// let CurrentUserData;
 
-if("BookRecord" in localStorage){
-    let storeArray = JSON.parse(localStorage.getItem("BookRecord"));
-    let CurrentUser = sessionStorage.getItem("currentUser");
-
-    if(CurrentUser in storeArray){
-        let CurrentUserData = Object.assign({}, storeArray[CurrentUser]);
-        // console.log(CurrentUserData);
-        // console.log(Object.keys(CurrentUserData));   
-        let dataList = Object.keys(CurrentUserData);  
-        for(i in dataList){
-            i=dataList[i];
-            // console.log(Object.keys(CurrentUserData));     
-
-            // console.log(parseInt(i), CurrentUserData[i]);
-            // console.log(typeof(i));
-            // console.log(CurrentUserData[i]);
-            addItem(i, CurrentUserData[i]);
+if("currentUser" in sessionStorage){
+    let currentUser = sessionStorage.getItem("currentUser");
+    fetch("/my-store/books",{
+        method : 'POST',
+        body: currentUser,
+        headers: {
+            'Content-Type': 'application/text'
         }
-    }
-
-    // storeArray.forEach(addItem);
+        })
+        .then(response => {
+        if(response.ok){
+        return response.json();
+        }
+        })
+        .then(Books => {
+        console.log(Books);
+        Books.forEach(item =>{
+            console.log(item.id);
+            addItem(item);
+        });
+        })
+        .catch(error => {
+            // Handle errors that occurred during the fetch
+            console.error('Error:', error);
+        });
 }
 
-function addItem(i, item){
+
+function addItem(item){
     // let storeArray = JSON.parse(localStorage.getItem("BookRecord"));
     // let CurrentUser = sessionStorage.getItem("currentUser");
     // console.log("Current user :"+CurrentUser);
@@ -44,6 +49,9 @@ function addItem(i, item){
     // console.log("CurrentUser Data :" + storeArray[CurrentUser]);
 
     // let item = Object.assign({}, CurrentUserData1[i]);
+    let i = item.id;
+    let imgPath = item.bookImage.slice(-14);
+
 
     console.log(item);
     console.log(typeof(item));
@@ -80,11 +88,10 @@ function addItem(i, item){
 
     OneItem.appendChild(btnDiv);
 
-
     let imgContainer = document.createElement("div");
     imgContainer.classList.add("all-items-item");
     let imgSrc = document.createElement("img");
-    imgSrc.setAttribute('src',item.ImageFile);
+    imgSrc.setAttribute('src',"data:image/jpeg;base64,"+item.bookImage);
     imgContainer.appendChild(imgSrc);
     OneItem.appendChild(imgContainer);
 
@@ -100,8 +107,8 @@ function addItem(i, item){
     mrpSpan.appendChild(rupee);
     // price.appendChild(mrpSpan);
 
-    let priceCalculate = item.MRP - ((item.MRP/100)*item.Discount);
-    let actualPrice = document.createTextNode("₹"+priceCalculate);
+    let priceCalculate = item.price - ((item.price/100)*item.discount);
+    let actualPrice = document.createTextNode("₹"+priceCalculate.toFixed(2));
     price.appendChild(actualPrice);
     priceContainer.appendChild(price);
 
@@ -115,7 +122,7 @@ function addItem(i, item){
     let mrpDiv = document.createElement("span");
     mrpDiv.classList.add("item-mrp-line-through");
     // console.log(item.MRP);
-    let mrpPrice = item.MRP;
+    let mrpPrice = item.price;
     let Mrpval = document.createTextNode(mrpPrice);
     mrpDiv.appendChild(Mrpval);
 
@@ -133,74 +140,65 @@ function addItem(i, item){
 }
 
 
-let submitBtn = document.getElementById("add-item-btn");
-submitBtn.addEventListener("click", function(){
-    document.getElementById("add-item-form").reset();
-
-});
 
 
-fileInput.addEventListener("change", function() {
-    const fileInput = this.files[0];
-    const reader= new FileReader();
 
-    reader.readAsDataURL(fileInput);
-    reader.addEventListener("load", ()=>{
-        let itemTitle = document.getElementById("item-title").value;
-        let authorName  = document.getElementById("author-name").value;
-        let storeName = document.getElementById("store-name").value;
-        let mrp = document.getElementById("mrp").value;
-        let discount = document.getElementById("discount").value;
-        let category = document.getElementById("item-category").value;
-        let description = document.getElementById("description").value;
+addForm.addEventListener("submit", f =>{
+    f.preventDefault();
 
-        let CurrentUser = sessionStorage.getItem("currentUser");
-        console.log(CurrentUser);
+    let itemTitle = document.getElementById("item-title").value;
+    let authorName  = document.getElementById("author-name").value;
+    let storeName = document.getElementById("store-name").value;
+    let mrp = document.getElementById("mrp").value;
+    let discount = document.getElementById("discount").value;
+    let category = document.getElementById("item-category").value;
+    let description = document.getElementById("description").value;
+    const bookImage = fileInput.files[0];
+    const filePath = bookImage ? bookImage.name : '';
+    console.log(bookImage);
 
-        let myObj = {
-            Title : itemTitle,
-            Author : authorName,
-            StoreName : storeName,
-            MRP : mrp,
-            Discount : discount,
-            Category : category,
-            Description : description,
-            ImageFile : reader.result
-        }
+    let adminId = sessionStorage.getItem("currentUser");
+    console.log(adminId);
 
-        let storeArray={};
-        let CurrentUserData;
-        if("BookRecord" in localStorage){
-            storeArray = JSON.parse(localStorage.getItem("BookRecord"));
-            console.log("entered in 1");
-            if(CurrentUser in storeArray){
-                console.log("entered in 2");
-                CurrentUserData = Object.assign({}, storeArray[CurrentUser]);
-                let keys= Object.keys(CurrentUserData);
-                let id = parseInt(keys.pop())+1;
-                CurrentUserData[id]=myObj;
-            }
-            else{
-                console.log("entered in 3");
-                CurrentUserData = {};
-                let id = 0;
-                CurrentUserData[id] = myObj;
-            }
-            
-        }
-        else{
-            console.log("entered in 3");
-            CurrentUserData = {};
-            let id = 0;
-            CurrentUserData[id] = myObj;
-        }
+    let myObj = {
+        title : itemTitle,
+        authorName : authorName,
+        storeName : storeName,
+        price : mrp,
+        discount : discount,
+        category : category,
+        description : description,
+        bookImage : filePath
+    }
 
-        storeArray[CurrentUser]=CurrentUserData;
+    let formData = new FormData();
+    formData.append("title", itemTitle);
+    formData.append("authorName", authorName);
+    formData.append("storeName", storeName);
+    formData.append("price",parseInt (mrp));
+    formData.append("discount", parseInt(discount));
+    formData.append("category", category);
+    formData.append("description", description);
+    formData.append("filePath", filePath);
+    formData.append("bookImage", bookImage);
+    formData.append("adminId", adminId)
 
-        localStorage.setItem("BookRecord",JSON.stringify(storeArray));
+    fetch("/my-store/add", {
+        method : 'POST',
+        body: formData,
+
+    })
+    .then(response =>{
+        console.log('Response:', response)
+    })
+    .catch(error => {
+        console.error('Error submitting data:', error);
     });
+    console.log("Success signup");
 
-});
+    location.reload();
+})
+
 
 
 function updateItem(id){
@@ -208,7 +206,7 @@ function updateItem(id){
     console.log(elementId);
     sessionStorage.setItem("clickedElement", elementId);
 
-    window.location.replace("admin-editItem.html");
+    window.location.replace("admin-editItem");
 
     // console.log(id);
 
@@ -429,14 +427,14 @@ function myStorePage(){
     location.assign("admin.html");
 }
 function wishListPage() {
-    location.assign("wishlist.html");
+    location.assign("wishlist");
 }
 function cartPage() {
-    location.assign("mycart.html")
+    location.assign("mycart")
 }
 let logOutBtn = document.getElementById("logout");
 
 logOutBtn.addEventListener("click", ()=>{
     sessionStorage.removeItem("currentUser");
-    location.replace("index.html");
+    location.replace("/");
 });

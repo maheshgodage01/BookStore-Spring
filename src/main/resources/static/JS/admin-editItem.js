@@ -88,7 +88,7 @@ function urlNavigate(){
     localStorage.setItem("BookRecord", JSON.stringify(storeArray));
     document.getElementById("admin-page-url").click();
     console.log("record updated");
-    // window.location.replace("index.html");
+    // window.location.replace("index");
     // document.getElementById("admin-page-url").click();   
 }
 

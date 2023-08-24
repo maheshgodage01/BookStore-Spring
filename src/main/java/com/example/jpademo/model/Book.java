@@ -1,6 +1,7 @@
 package com.example.jpademo.model;
 
 import jakarta.persistence.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Entity
 @Table(name = "books")
@@ -27,6 +28,22 @@ public class Book {
     private String adminId;
     @Column(name = "book-image")
     private String bookImage;
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", authorName='" + authorName + '\'' +
+                ", storeName='" + storeName + '\'' +
+                ", price=" + price +
+                ", discount=" + discount +
+                ", category='" + category + '\'' +
+                ", description='" + description + '\'' +
+                ", adminId='" + adminId + '\'' +
+                ", bookImage='" + bookImage + '\'' +
+                '}';
+    }
 
 
     public String getAdminId() {

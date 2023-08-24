@@ -344,13 +344,13 @@ function loginCheck() {
 }
 
 function myStorePage(){
-    location.assign("admin.html");
+    location.assign("admin");
 }
 function wishListPage() {
-    location.assign("wishlist.html");
+    location.assign("wishlist");
 }
 function cartPage() {
-    location.assign("mycart.html")
+    location.assign("mycart")
 }
 
 
@@ -468,5 +468,5 @@ let checkOut = document.getElementById("checkout-btn");
 checkOut.addEventListener("click", ()=>{
     console.log(window.Amount.toFixed(2));
     sessionStorage.setItem("TotalAmount", JSON.stringify(Amount));
-    location.assign("payment.html");
+    location.assign("payment");
 });

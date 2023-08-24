@@ -75,55 +75,36 @@ function loginCheck() {
 
 let userProfile = document.getElementById("user-profile");
 userProfile.addEventListener("click", ()=>{
-    location.replace("user-profile.html")
+    location.replace("user-profile")
 })
 
 
-if("BookRecord" in localStorage){
-    let allUserItems={};
-    let storeItem = JSON.parse(localStorage.getItem("BookRecord"));
-    // console.log(Object.keys(storeItem));
-    let userList = Object.keys(storeItem);
-    userList.forEach(User => {
-        let UserItemData = storeItem[User];
-        let UserItems = Object.keys(UserItemData);
-        // console.log(User);
-        // console.log(UserItemData);
-        UserItems.forEach(UserItem =>{
-            // console.log(UserItemData);
-            let key = User+"-"+UserItem;
-            allUserItems[key]=UserItemData[UserItem];
-        });
-        // let UserItems = Object.keys(storeItem[User]);
-        // console.log(userItems);
+
+
+fetch("/all-books",{
+    method : 'POST'
+    })
+    .then(response => {
+    if(response.ok){
+    return response.json();
+    }
+    })
+    .then(Books => {
+//    console.log(Books);
+    Books.forEach(item =>{
+        console.log(item);
+        showItem(item);
     });
-    console.log("all items:");
-    console.log(allUserItems);
-    // window.allUserItems = allUserItems;
-    sessionStorage.setItem("allUserItems", JSON.stringify(allUserItems));
-
-
-    let allKeys = Object.keys(allUserItems);
-    let storeArray = JSON.parse(localStorage.getItem("BookRecord"));
-    let CurrentUser = sessionStorage.getItem("currentUser");
-
-    console.log(CurrentUser);
-
-    allKeys.forEach(key =>{
-        if(!(parseInt(key)==CurrentUser)){
-            showItem(key, allUserItems[key]);
-        }
-
+    })
+    .catch(error => {
+        // Handle errors that occurred during the fetch
+        console.error('Error:', error);
     });
-    
-
-}
 
 
-
-
-function showItem(i, item){
-
+function showItem(item){
+    let i = item.id;
+    let imgPath = item.bookImage.slice(-14);
 
     if((Object.keys(item)).length == 0){
         return 0;
@@ -137,9 +118,9 @@ function showItem(i, item){
     let imgContainer = document.createElement("div");
     imgContainer.classList.add("suggested-item-img");
     let imgFile = document.createElement("img");
-    imgFile.setAttribute('src', item.ImageFile);
+    imgFile.setAttribute('src', "data:image/jpeg;base64,"+item.bookImage);
     imgFile.setAttribute('id', i+"i")
-    imgFile.setAttribute('onclick', "clickedItem(this.id)")
+    imgFile.setAttribute('onclick', "clickedItem(item)")
     imgContainer.appendChild(imgFile);
     mainContainer.appendChild(imgContainer);
 
@@ -149,8 +130,8 @@ function showItem(i, item){
     itemPrice.classList.add("suggested-item-price");
     let priceSpan = document.createElement("span");
     priceSpan.setAttribute('id', i+"a");
-    let priceCalculate = item.MRP - ((item.MRP/100)*item.Discount);
-    let price= document.createTextNode("₹"+priceCalculate);
+    let priceCalculate = item.price - ((item.price/100)*item.discount);
+    let price= document.createTextNode("₹"+priceCalculate.toFixed(2));
     priceSpan.appendChild(price);
     itemPrice.appendChild(priceSpan);
     priceContainer.appendChild(itemPrice);
@@ -162,7 +143,7 @@ function showItem(i, item){
     let mrpSpan = document.createElement("span");
     mrpSpan.classList.add("suggested-item-mrp-line-through");
     mrpSpan.setAttribute('id', i+"b");
-    let mrpValue = document.createTextNode("₹"+item.MRP);
+    let mrpValue = document.createTextNode("₹"+item.price);
     mrpSpan.appendChild(mrpValue);
     itemMrpContainer.appendChild(mrpSpan);
     priceContainer.appendChild(itemMrpContainer);
@@ -231,26 +212,26 @@ function showItem(i, item){
                 let myWishlist = Wishlist[CurrentUser];
                 if(myWishlist.includes(i)){
                     console.log("already in Wishlist");
-                    wishlistIcon.setAttribute('src', "Resources/Images/heart-icon-filled.png");
+                    wishlistIcon.setAttribute('src', "Images/heart-icon-filled.png");
                 }
                 else{
-                    wishlistIcon.setAttribute('src', "Resources/Images/heart-icon-pink.png");
+                    wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
                 }
             }
             else{
-                wishlistIcon.setAttribute('src', "Resources/Images/heart-icon-pink.png");
+                wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
             }
            
         }
         else{
-            wishlistIcon.setAttribute('src', "Resources/Images/heart-icon-pink.png");
+            wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
 
         }
     }
     else{
-        wishlistIcon.setAttribute('src', "Resources/Images/heart-icon-pink.png");
+        wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
     }
-    // wishlistIcon.setAttribute('src', "Resources/Images/heart-icon-pink.png");
+    // wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
     // wishlistIcon.setAttribute("onclick", "addToWishlist(this.id)");
     wishlistContainer.appendChild(wishlistIcon);
     buyBtnContainer.appendChild(wishlistContainer);
@@ -276,13 +257,13 @@ let cart = document.getElementById("cart");
 // wishList.addEventListener("click", )
 
 function myStorePage(){
-    location.assign("admin.html");
+    location.assign("admin");
 }
 function wishListPage() {
-    location.assign("wishlist.html");
+    location.assign("wishlist");
 }
 function cartPage() {
-    location.assign("mycart.html")
+    location.assign("mycart")
 }
 
 function addToCart(id) {
@@ -356,7 +337,7 @@ function addToWishlist(id){
     // if(imgNode.getAttribute('src')){
 
     // }
-    // imgNode.setAttribute('src', "Resources/Images/heart-icon-filled.png")
+    // imgNode.setAttribute('src', "Images/heart-icon-filled.png")
     console.log(imgNode);
 
     if("currentUser" in sessionStorage){
@@ -375,14 +356,14 @@ function addToWishlist(id){
                     console.log(myWishlist);
                     localStorage.setItem("Wishlist",JSON.stringify(Wishlist));
                     console.log("removed from wishlist");
-                    imgNode.setAttribute('src', "Resources/Images/heart-icon-pink.png")
+                    imgNode.setAttribute('src', "Images/heart-icon-pink.png")
                 }
                 else{
                     myWishlist.push(key);
                     Wishlist[CurrentUser] = myWishlist;
                     localStorage.setItem("Wishlist",JSON.stringify(Wishlist));
                     console.log("added to wishlist");
-                    imgNode.setAttribute('src', "Resources/Images/heart-icon-filled.png")
+                    imgNode.setAttribute('src', "Images/heart-icon-filled.png")
                 }
             }
             else{
@@ -391,7 +372,7 @@ function addToWishlist(id){
                 Wishlist[CurrentUser] = myWishlist;
                 localStorage.setItem("Wishlist",JSON.stringify(Wishlist));
                 console.log("added to wishlist");
-                imgNode.setAttribute('src', "Resources/Images/heart-icon-filled.png")
+                imgNode.setAttribute('src', "Images/heart-icon-filled.png")
             }
             
             // myCart.push(key);
@@ -430,7 +411,7 @@ function addToWishlist(id){
 //     sessionStorage.setItem("clickedItem", clickedItem);
 // }
 
-function clickedItem(i){
+function clickedItem(item){
     
     if(i==undefined){
         return 0;
@@ -438,19 +419,18 @@ function clickedItem(i){
     // let key = i.slice(0, -1);
     // sessionStorage.setItem("clickedItem", key)
 
-    let allBooks = JSON.parse(sessionStorage.getItem("allUserItems"));
-    key = i.slice(0, -1);
-    console.log(key)
-    let item = allBooks[key]
+    let imgPath = item.bookImage.slice(-14);
+
     console.log(item);
     let mainBook = document.getElementById("one-book");
     let mainContainer = document.createElement("div");
     mainContainer.classList.add("clicked-book");
+    let key = item.id;
 
     let imgContainer = document.createElement("div");
     imgContainer.classList.add("item-elements");
     let imgFile = document.createElement("img");
-    imgFile.setAttribute('src', item.ImageFile);
+    imgFile.setAttribute('src', "Books/"+imgPath);
     imgFile.setAttribute('width', "250px");
     imgContainer.appendChild(imgFile);
     mainContainer.appendChild(imgContainer);
@@ -461,7 +441,7 @@ function clickedItem(i){
 
     let bookNameDiv = document.createElement("div");
     bookNameDiv.classList.add("book-name");
-    let bookName = document.createTextNode(item.Title);
+    let bookName = document.createTextNode(item.title);
     bookNameDiv.appendChild(bookName);
     bookDetails.appendChild(bookNameDiv);
 
@@ -472,12 +452,12 @@ function clickedItem(i){
     authorDescription.classList.add("item-elements");
     let authorNameDiv = document.createElement("div");
     authorNameDiv.classList.add("author");
-    let authorName = document.createTextNode("AUTHOR:"+item.Author);
+    let authorName = document.createTextNode("AUTHOR:"+item.authorName);
     authorNameDiv.appendChild(authorName);
     authorDescription.appendChild(authorNameDiv);
     let descriptionDiv = document.createElement("div");
     descriptionDiv.classList.add("book-description");
-    let bookDescription = document.createTextNode(item.Description);
+    let bookDescription = document.createTextNode(item.description);
     descriptionDiv.appendChild(bookDescription);
     authorDescription.appendChild(descriptionDiv);
     bookDetailsOther.appendChild(authorDescription);
@@ -487,7 +467,7 @@ function clickedItem(i){
 
     let priceDiv = document.createElement("div");
     priceDiv.classList.add("price-price-index");
-    let priceCalculate = item.MRP - ((item.MRP/100)*item.Discount);
+    let priceCalculate = item.price - ((item.price/100)*item.discount);
     let price = document.createTextNode("₹"+priceCalculate);
     priceDiv.appendChild(price);
     purchaseContainer.appendChild(priceDiv);
@@ -496,13 +476,13 @@ function clickedItem(i){
     priceDiscount.classList.add("price-discount1");
     let discountDiv = document.createElement("div");
     discountDiv.classList.add("off");
-    let off = document.createTextNode("("+item.Discount+"%OFF)");
+    let off = document.createTextNode("("+item.discount+"%OFF)");
     discountDiv.appendChild(off);
     priceDiscount.appendChild(discountDiv);
     let mrpDiv = document.createElement("div");
     mrpDiv.classList.add("mrp");
     let mrpPrice = document.createElement("s");
-    let mrpPriceS = document.createTextNode("₹"+item.MRP);
+    let mrpPriceS = document.createTextNode("₹"+item.price);
     mrpPrice.appendChild(mrpPriceS);
     let mrp = document.createTextNode("MRP");
     mrpDiv.appendChild(mrp);
@@ -510,7 +490,6 @@ function clickedItem(i){
     priceDiscount.appendChild(mrpDiv);
     
     purchaseContainer.appendChild(priceDiscount);
-
 
     let buyBtn = document.createElement("div");
     let addToCart = document.createElement("button");
@@ -568,23 +547,23 @@ function clickedItem(i){
             if(!(myWishlist==undefined)){
                 if(myWishlist.includes(key)){
                     console.log("already in Wishlist");
-                    wishlistBtn.setAttribute('src',"Resources/Images/heart-icon-filled.png");            }
+                    wishlistBtn.setAttribute('src',"Images/heart-icon-filled.png");            }
                 else{
-                    wishlistBtn.setAttribute('src',"Resources/Images/heart-icon-pink.png");            }
+                    wishlistBtn.setAttribute('src',"Images/heart-icon-pink.png");            }
             }
             else{
-                wishlistBtn.setAttribute('src',"Resources/Images/heart-icon-pink.png");            }
+                wishlistBtn.setAttribute('src',"Images/heart-icon-pink.png");            }
             
            
         }
         else{
-            wishlistBtn.setAttribute('src',"Resources/Images/heart-icon-pink.png");
+            wishlistBtn.setAttribute('src',"Images/heart-icon-pink.png");
         }
     }
     else{
-        wishlistBtn.setAttribute('src',"Resources/Images/heart-icon-pink.png");
+        wishlistBtn.setAttribute('src',"Images/heart-icon-pink.png");
     }
-    // wishlistBtn.setAttribute('src',"Resources/Images/heart-icon-pink.png");
+    // wishlistBtn.setAttribute('src',"Images/heart-icon-pink.png");
     wishlistBtn.setAttribute('width', "35px");
     addToWishlist.appendChild(wishlistBtn);
     buyBtn.appendChild(addToWishlist);
@@ -597,6 +576,6 @@ function clickedItem(i){
     mainBook.replaceChild(mainContainer, mainBook.children[0]);
 
 
-    location.assign("index.html#")
+    location.assign("/")
 
 }

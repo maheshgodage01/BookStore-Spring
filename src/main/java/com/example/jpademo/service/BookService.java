@@ -19,6 +19,7 @@ public class BookService {
 
     public String addBook(Book book){
         bookRepository.save(book);
+        bookRepository.flush();
         return "success";
     }
 

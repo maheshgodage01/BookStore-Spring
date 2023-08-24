@@ -64,7 +64,8 @@ function getAllUsers(){
         .catch(error => {
             // Handle errors that occurred during the fetch
             console.error('Error:', error);
-        })
+        }
+    );
 }
 //getAllUsers();
 

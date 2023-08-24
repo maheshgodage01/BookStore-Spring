@@ -75,17 +75,17 @@ function loginCheck() {
 
 // let userProfile = document.getElementById("user-profile");
 // userProfile.addEventListener("click", ()=>{
-//     location.replace("user-profile.html")
+//     location.replace("user-profile")
 // });
 
 function myStorePage(){
-    location.assign("admin.html");
+    location.assign("admin");
 }
 function wishListPage() {
-    location.assign("wishlist.html");
+    location.assign("wishlist");
 }
 function cartPage() {
-    location.assign("mycart.html")
+    location.assign("mycart")
 }
 
 

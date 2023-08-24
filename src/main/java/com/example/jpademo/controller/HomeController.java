@@ -22,6 +22,11 @@ public class HomeController {
         return "login";
     }
 
+    @GetMapping("/my-store")
+    public String admin(){
+        return "admin";
+    }
+
 //    @PostMapping("/api/signup")
 //    @ResponseBody
 //    public User signUpForm(@RequestBody User user){
