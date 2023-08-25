@@ -17,6 +17,10 @@ public class BookService {
         return bookRepository.findAll();
     }
 
+    public Book getBookById(int bookId){
+        return bookRepository.findById(bookId);
+    }
+
     public String addBook(Book book){
         bookRepository.save(book);
         bookRepository.flush();

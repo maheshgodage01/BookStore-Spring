@@ -3,6 +3,7 @@ package com.example.jpademo.controller;
 import com.example.jpademo.model.Login;
 import com.example.jpademo.model.User;
 import com.example.jpademo.service.UserService;
+import org.apache.tomcat.util.net.jsse.JSSEUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,19 +22,43 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PostMapping("/check-user")
+    @ResponseBody
+    public Boolean checkUser(@RequestBody String userName){
+        List<User> users = userService.getAllUsers();
+        System.out.println("inside Check User:"+userName);
+
+
+        for(User user: users){
+            System.out.println(user.getContactNumber());
+            if(Objects.equals(userName, user.getContactNumber())){
+                System.out.println(userName +" Already Exist");
+                return true;
+            }
+        }
+        return  false;
+    }
+
     @PostMapping("/login")
     @ResponseBody
-    public Boolean getAllUsers(@RequestBody Login login){
+    public String getAllUsers(@RequestBody Login login){
         List<User> users = userService.getAllUsers();
         System.out.println(login);
 
         for(User user: users){
+            System.out.println("inside Login Check:"+login.getUserName()+"=="+user.getContactNumber());
             if(Objects.equals(login.getUserName(), user.getContactNumber())){
-                return Objects.equals(user.getPassword(), login.getPassWord());
+                System.out.println();
+                if(Objects.equals(user.getPassword(), login.getPassWord())){
+                    return "True";
+                }else {
+                    return "TrueFalse";
+                }
             }
+
         }
         System.out.println("all users");
-        return  false;
+        return "False";
     }
 
     @PostMapping("/signup")

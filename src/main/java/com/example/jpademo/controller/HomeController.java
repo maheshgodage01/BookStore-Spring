@@ -26,6 +26,22 @@ public class HomeController {
     public String admin(){
         return "admin";
     }
+    @GetMapping("/wishlist")
+    public String wishList(){
+        return "wishlist";
+    }
+    @GetMapping("/my-cart")
+    public String myCart(){
+        return "mycart";
+    }
+
+    @GetMapping("payment")
+    public String payment(){
+        return "Payment";
+    }
+
+
+
 
 //    @PostMapping("/api/signup")
 //    @ResponseBody

@@ -16,25 +16,56 @@ let isAltContactValid = true;
 
 signUpForm.addEventListener("submit", e => {
     e.preventDefault();
-
-    if (validateSignUpForm()){
-        document.getElementById("signup-form").style.display="none";
-        document.getElementById("pass-form").style.display="flex"; 
-    }else {
-        document.getElementById("signup-form").style.display="flex";
-        document.getElementById("pass-form").style.display="none"; 
-    }
+    let username = document.getElementById("mob-num").value;
+    checkUser(username);
 
 });
 // passFieldTwo.addEventListener("onclick", validatePassOne);
+
+function checkUser(username){
+    fetch("/api/check-user",{
+        method : 'POST',
+        body : username,
+        headers: {
+            'Content-Type': 'application/text'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+          throw new Error(`Network response was not ok. Status: ${response.status}`);
+        }
+        return response.json(); // Parse the JSON response
+    })
+    .then(response =>{
+    console.log("UserCheck : "+response);
+        if(response){
+            alert("User "+username+" Already Exist!! LOGIN");
+            location.reload();
+        }else{
+            if (validateSignUpForm()){
+                document.getElementById("signup-form").style.display="none";
+                document.getElementById("pass-form").style.display="flex";
+            }else {
+                document.getElementById("signup-form").style.display="flex";
+                document.getElementById("pass-form").style.display="none";
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error submitting data:', error);
+    });
+
+}
 
 passForm.addEventListener("submit", f =>{
     console.log(" function called");
     f.preventDefault();
     console.log("validate function called");
-    validatePass();
-    console.log("storedata function called");
-    storeData();
+    if(validatePass()){
+        console.log("storedata function called");
+        storeData();
+    }
+
     
 });
 
@@ -48,7 +79,6 @@ function validateSignUpForm() {
     let returnValueName = true;
     let returnValueEmail = true;
     let returnValueAltContact = true;
-
 
     if(isContactValid){
         returnValueContact = true;

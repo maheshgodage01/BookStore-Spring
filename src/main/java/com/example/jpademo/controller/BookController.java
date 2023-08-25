@@ -1,7 +1,11 @@
 package com.example.jpademo.controller;
 
 import com.example.jpademo.model.Book;
+import com.example.jpademo.model.Cart;
+import com.example.jpademo.model.Wishlist;
 import com.example.jpademo.service.BookService;
+import com.example.jpademo.service.CartService;
+import com.example.jpademo.service.WishlistService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.RequestEntity;
@@ -20,6 +24,12 @@ import java.util.*;
 public class BookController {
     @Autowired
     BookService bookService;
+
+    @Autowired
+    CartService cartService;
+
+    @Autowired
+    WishlistService wishlistService;
 
     @PostMapping("all-books")
     @ResponseBody
@@ -43,7 +53,6 @@ public class BookController {
             System.out.println(book.getAdminId());
             if(Objects.equals(book.getAdminId(), currentUser)){
                 userBooks.add(extractBook(book));
-
             }
         }
         return ResponseEntity.ok(userBooks);
@@ -93,6 +102,99 @@ public class BookController {
         return book;
     }
 
+    @PostMapping("api/my-cart")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, String>>> getMyCart(@RequestBody String userName) throws IOException {
+        List<Book> allBooks = bookService.getAllBooks();
+        List<Cart> allCart = cartService.getAllCart(userName);
+        List<Map<String, String>> userBooks = new ArrayList<>();
+        System.out.println(userName);
+        System.out.println(allCart);
+
+        System.out.println(allCart);
+        for (Cart cart : allCart){
+            int bookId = cart.getBookId();
+            userBooks.add(extractBook(bookService.getBookById(bookId)));
+        }
+        return ResponseEntity.ok(userBooks);
+    }
+
+    @PostMapping("api/get-all-cart")
+    @ResponseBody
+    public List<Integer> getAllCartId(@RequestBody String userName){
+        List<Integer> allCartId = new ArrayList<>();
+        List<Cart> allCart = cartService.getAllCart(userName);
+        for (Cart cart: allCart){
+            allCartId.add(cart.getBookId());
+        }
+        return allCartId;
+    }
+
+    @PostMapping("api/my-wishlist")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, String>>> getMyWishlist(@RequestBody String userName) throws IOException {
+        List<Book> allBooks = bookService.getAllBooks();
+        List<Wishlist> allWishlist = wishlistService.getAllWishlist(userName);
+        List<Map<String, String>> userBooks = new ArrayList<>();
+        System.out.println(userName);
+        System.out.println(allWishlist);
+
+        System.out.println(allWishlist);
+        for (Wishlist wishlist : allWishlist){
+            int bookId = wishlist.getBookId();
+            userBooks.add(extractBook(bookService.getBookById(bookId)));
+        }
+        return ResponseEntity.ok(userBooks);
+    }
+
+    @PostMapping("api/get-book")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> getBook(@RequestParam("id") int id) throws IOException {
+        System.out.println(id);
+        Book book = bookService.getBookById(id);
+        return ResponseEntity.ok(extractBook(book));
+    }
+
+    @PostMapping("api/add-to-cart")
+    @ResponseBody
+    public Boolean addToCart(@RequestParam String userId, @RequestParam int bookId){
+        System.out.println(userId+" "+bookId);
+
+        List<Cart> allCart = cartService.getAllCart(userId);
+
+        for (Cart cart: allCart){
+            System.out.println(cart.getBookId()+"=="+bookId);
+            if(cart.getBookId()==bookId){
+                return false;
+            }
+        }
+        Cart cart = new Cart();
+        cart.setBookId(bookId);
+        cart.setUserId(userId);
+        cartService.addToCart(cart);
+        return true;
+    }
+
+    @PostMapping("api/add-to-wishlist")
+    @ResponseBody
+    public Boolean addToWishlist(@RequestParam String userId, @RequestParam int bookId){
+        System.out.println(userId+" "+bookId);
+
+        List<Wishlist> allWishlist = wishlistService.getAllWishlist(userId);
+
+        for (Wishlist wishlist: allWishlist){
+            if(wishlist.getBookId()==bookId){
+                return false;
+            }
+        }
+        Wishlist wishlist = new Wishlist();
+        wishlist.setBookId(bookId);
+        wishlist.setUserId(userId);
+        wishlistService.addToWishlist(wishlist);
+        return true;
+    }
+
+
     public Map<String, String> extractBook(Book book) throws IOException {
         Map<String, String> response = new HashMap<>();
 
@@ -114,6 +216,10 @@ public class BookController {
 
         return response;
     }
+
+
+
+
 
 
 

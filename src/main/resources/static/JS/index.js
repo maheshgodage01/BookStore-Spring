@@ -10,10 +10,7 @@ profilePopup.addEventListener("mouseover", popup);
 profilePopup.addEventListener("mouseout", closePopup);
 
 
-
-// window.allBooks = JSON.parse(sessionStorage.getItem("allUserItems"));
-
-
+window.CartItems;
 
 let login = false;
 function profileBtnPopup(){
@@ -72,12 +69,32 @@ function loginCheck() {
 
     return userName;
 }
-
 let userProfile = document.getElementById("user-profile");
 userProfile.addEventListener("click", ()=>{
     location.replace("user-profile")
 })
 
+
+let currentUser = sessionStorage.getItem("currentUser");
+    fetch("/api/get-all-cart",{
+            method : 'POST',
+            body : currentUser,
+            headers: {
+                'Content-Type': 'application/text'
+            }
+        })
+        .then(response => {
+            if(response.ok){
+            return response.json();
+        }
+        })
+        .then(Books => {
+            sessionStorage.setItem("myCart", JSON.stringify(Books));
+        })
+        .catch(error => {
+            // Handle errors that occurred during the fetch
+            console.error('Error:', error);
+        });
 
 
 
@@ -90,7 +107,7 @@ fetch("/all-books",{
     }
     })
     .then(Books => {
-//    console.log(Books);
+
     Books.forEach(item =>{
         console.log(item);
         showItem(item);
@@ -102,9 +119,14 @@ fetch("/all-books",{
     });
 
 
+
+
 function showItem(item){
-    let i = item.id;
-    let imgPath = item.bookImage.slice(-14);
+    let id = item.id;
+    let clickedItem = sessionStorage.getItem("clickedItem");
+    if(id == clickedItem){
+        return;
+    }
 
     if((Object.keys(item)).length == 0){
         return 0;
@@ -113,14 +135,14 @@ function showItem(item){
 
     let mainContainer = document.createElement("div");
     mainContainer.classList.add("suggested-item-list");
-    mainContainer.setAttribute('id', i);
+//    mainContainer.setAttribute('id', i);
 
     let imgContainer = document.createElement("div");
     imgContainer.classList.add("suggested-item-img");
     let imgFile = document.createElement("img");
     imgFile.setAttribute('src', "data:image/jpeg;base64,"+item.bookImage);
-    imgFile.setAttribute('id', i+"i")
-    imgFile.setAttribute('onclick', "clickedItem(item)")
+    imgFile.setAttribute('id', id)
+    imgFile.setAttribute('onclick', "clickedItem(this.id)")
     imgContainer.appendChild(imgFile);
     mainContainer.appendChild(imgContainer);
 
@@ -129,7 +151,7 @@ function showItem(item){
     let itemPrice = document.createElement("div");
     itemPrice.classList.add("suggested-item-price");
     let priceSpan = document.createElement("span");
-    priceSpan.setAttribute('id', i+"a");
+    priceSpan.setAttribute('id', id+"a");
     let priceCalculate = item.price - ((item.price/100)*item.discount);
     let price= document.createTextNode("₹"+priceCalculate.toFixed(2));
     priceSpan.appendChild(price);
@@ -142,7 +164,7 @@ function showItem(item){
     itemMrpContainer.appendChild(mrpText);
     let mrpSpan = document.createElement("span");
     mrpSpan.classList.add("suggested-item-mrp-line-through");
-    mrpSpan.setAttribute('id', i+"b");
+    mrpSpan.setAttribute('id', id+"b");
     let mrpValue = document.createTextNode("₹"+item.price);
     mrpSpan.appendChild(mrpValue);
     itemMrpContainer.appendChild(mrpSpan);
@@ -154,52 +176,34 @@ function showItem(item){
     buyBtnContainer.classList.add("suggested-buy-btn");
     let cartContainer = document.createElement("button");
     cartContainer.classList.add("suggested-add-to-bag");
-    cartContainer.setAttribute('id', i+"c");
+    cartContainer.setAttribute('id', id+"c");
     cartContainer.setAttribute("onclick", "addToCart(this.id)");
 
     if("currentUser" in sessionStorage){
         let CurrentUser = sessionStorage.getItem("currentUser");
-        if("Cart" in localStorage){
-            let Cart = JSON.parse(localStorage.getItem("Cart"));
-            // let myCart = 
-            
-            if(CurrentUser in Cart){
-                let myCart = Cart[CurrentUser];
-                console.log(myCart);
-                if(myCart.includes(i)){
-                    console.log("already in Cart");
-                    let carttext = document.createTextNode("Added to Cart");
-                    cartContainer.appendChild(carttext);
-                }
-                else{
-                    let carttext = document.createTextNode("Add to Cart");
-                    cartContainer.appendChild(carttext);
-                }
-            }
-            else{
-                let carttext = document.createTextNode("Add to Cart");
-                cartContainer.appendChild(carttext);
-            }
-            // console.log(myCart);
-            
-           
+        let Books = sessionStorage.getItem("myCart");
+        console.log(Books);
+        if(Books.includes(id)){
+            let carttext = document.createTextNode("Added to Cart");
+            cartContainer.appendChild(carttext);
         }
         else{
             let carttext = document.createTextNode("Add to Cart");
             cartContainer.appendChild(carttext);
-
         }
+
     }
     else{
-        let carttext = document.createTextNode("Add to Cart");
+        let carttext = document.createTextNode("Added to Cart");
         cartContainer.appendChild(carttext);
     }
+
     
     buyBtnContainer.appendChild(cartContainer);
 
     let wishlistContainer = document.createElement("button");
     wishlistContainer.classList.add("suggested-add-to-wishlist");
-    wishlistContainer.setAttribute('id', i+"d");
+    wishlistContainer.setAttribute('id', id+"d");
     wishlistContainer.setAttribute('onclick', "addToWishlist(this.id)");
     let wishlistIcon = document.createElement("img");
 
@@ -241,7 +245,6 @@ function showItem(item){
     allItemList.appendChild(mainContainer);
 }
 
-
 let logOutBtn = document.getElementById("logout");
 
 logOutBtn.addEventListener("click", ()=>{
@@ -257,169 +260,115 @@ let cart = document.getElementById("cart");
 // wishList.addEventListener("click", )
 
 function myStorePage(){
-    location.assign("admin");
+    location.assign("my-store");
 }
 function wishListPage() {
     location.assign("wishlist");
 }
 function cartPage() {
-    location.assign("mycart")
+    location.assign("my-cart")
 }
 
 function addToCart(id) {
     let addToCartBtn = document.getElementById(id);
-    // addToCartBtn.innerHTML="Nothing";
-    let key = id.slice(0,-1);
-    console.log(id);
-    console.log(typeof(key));
-    console.log(key);
-    if("currentUser" in sessionStorage){
-        let CurrentUser = sessionStorage.getItem("currentUser");
-        if("Cart" in localStorage){
-            let Cart = JSON.parse(localStorage.getItem("Cart"));
-            // let myCart = 
-            
-            if(CurrentUser in Cart){
-                let myCart = Cart[CurrentUser];
-                if(myCart.includes(key)){
-                    alert("already in cart");
-                }
-                else{
-                    myCart.push(key);
-                    Cart[CurrentUser] = myCart;
-                    localStorage.setItem("Cart",JSON.stringify(Cart));
-                    addToCartBtn.innerHTML = "ADDED TO CART";
-                    console.log("added to cart");
-                }
-            }
-            else{
-                let myCart = [];
-                myCart.push(key);
-                Cart[CurrentUser] = myCart;
-                localStorage.setItem("Cart",JSON.stringify(Cart));
-                addToCartBtn.innerHTML = "ADDED TO CART";
-                console.log("added to cart");
-            }
+    id = parseInt(id);
 
-            
-            // myCart.push(key);
-            // Cart[CurrentUser] = myCart;
-            // localStorage.setItem("Cart",JSON.stringify(Cart));
+    if(addToCartBtn.innerHTML == "ADDED TO CART"){
+        alert("Already in cart");
+        return;
+    }
+    let currentUser = sessionStorage.getItem("currentUser");
+    let formData = new FormData();
+    formData.append("bookId", id);
+    formData.append("userId", currentUser)
+
+    fetch("/api/add-to-cart",{
+        method : 'POST',
+        body : formData,
+    })
+    .then(response => {
+        return response.json()
+    })
+    .then(response => {
+    console.log(response);
+        if(response){
+            addToCartBtn.innerHTML = "ADDED TO CART";
+            console.log("added to cart");
         }
         else{
-            let Cart = {};
-            let myCart = [];
-            if(myCart.includes(key)){
-                alert("Already in cart");
-            }else{
-                myCart.push(key);
-                Cart[CurrentUser] = myCart;
-
-                localStorage.setItem("Cart",JSON.stringify(Cart));
-                addToCartBtn.innerHTML = "ADDED TO CART";
-                console.log("Added to Cart");
-            }
-            
+        alert("Already in Cart");
         }
+    })
+    .catch(error => {
+        console.error('Error submitting data:', error);
+    });
 
-    }else{
-        alert("Please LOGIN!");
-    }
-    // location.reload();
 }
 
 function addToWishlist(id){
-    let key = id.slice(0, -1);
-
-    console.log(id);
     let imgNode = document.getElementById(id).childNodes[0];
-    console.log(imgNode.getAttribute('src'))
-    // if(imgNode.getAttribute('src')){
+    id = parseInt(id);
+    let addToCartBtn = document.getElementById(id);
 
-    // }
-    // imgNode.setAttribute('src', "Images/heart-icon-filled.png")
-    console.log(imgNode);
 
-    if("currentUser" in sessionStorage){
-        let CurrentUser = sessionStorage.getItem("currentUser");
-        if("Wishlist" in localStorage){
-            let Wishlist = JSON.parse(localStorage.getItem("Wishlist"));
-            // let myCart = 
-            
-            if(CurrentUser in Wishlist){
-                let myWishlist = Wishlist[CurrentUser];
-                if(myWishlist.includes(key)){
-                    console.log(myWishlist);
-                    let index = myWishlist.indexOf(key);
-                    myWishlist.splice(index, 1);
-                    Wishlist[CurrentUser] = myWishlist;
-                    console.log(myWishlist);
-                    localStorage.setItem("Wishlist",JSON.stringify(Wishlist));
-                    console.log("removed from wishlist");
-                    imgNode.setAttribute('src', "Images/heart-icon-pink.png")
-                }
-                else{
-                    myWishlist.push(key);
-                    Wishlist[CurrentUser] = myWishlist;
-                    localStorage.setItem("Wishlist",JSON.stringify(Wishlist));
-                    console.log("added to wishlist");
-                    imgNode.setAttribute('src', "Images/heart-icon-filled.png")
-                }
-            }
-            else{
-                let myWishlist = [];
-                myWishlist.push(key);
-                Wishlist[CurrentUser] = myWishlist;
-                localStorage.setItem("Wishlist",JSON.stringify(Wishlist));
-                console.log("added to wishlist");
-                imgNode.setAttribute('src', "Images/heart-icon-filled.png")
-            }
-            
-            // myCart.push(key);
-            // Cart[CurrentUser] = myCart;
-            // localStorage.setItem("Cart",JSON.stringify(Cart));
+//    if(imgNode.innerHTML == "ADDED TO CART"){
+//        alert("Already in cart");
+//        return;
+//    }
+    let currentUser = sessionStorage.getItem("currentUser");
+    let formData = new FormData();
+    formData.append("bookId", id);
+    formData.append("userId", currentUser)
+
+    fetch("/api/add-to-wishlist",{
+        method : 'POST',
+        body : formData,
+    })
+    .then(response => {
+        console.log(response);
+        if(response){
+            addToCartBtn.innerHTML = "ADDED TO CART";
+            console.log("added to wishlist");
         }
         else{
-            let Wishlist = {};
-            let myWishlist = [];
-            if(myWishlist.includes(key)){
-                alert("Already in wishlist");
-            }else{
-                myWishlist.push(key);
-                Wishlist[CurrentUser] = myWishlist;
-
-                localStorage.setItem("Wishlist",JSON.stringify(Wishlist));
-                console.log("Added to Wishlist");
-            }
-            
+            alert("Already in Cart!!");
         }
-
-    }else{
-        alert("Please LOGIN!");
-    }
-    // location.reload();
+    })
+    .catch(error => {
+        console.error('Error submitting data:', error);
+    });
 }
 
-// if("clickedItem" in sessionStorage){
-//     let clickedItem = sessionStorage.getItem("clickedItem");
-//     if(!(clickedItem == " ")){
-//         console.log("clicked item :"+clickedItem);
-//     }
-// }
-// else{
-//     let clickedItem = " ";
-//     sessionStorage.setItem("clickedItem", clickedItem);
-// }
+function clickedItem(id){
+    sessionStorage.setItem("clickedItem", id);
 
-function clickedItem(item){
-    
+    console.log("clicked id:"+id);
+    let formData = new FormData();
+    formData.append("id", id);
+
+    fetch("/api/get-book",{
+        method : 'POST',
+        body : formData,
+    })
+    .then(response => {
+        if(response.ok){
+        return response.json();
+    }
+    })
+    .then(Book => {
+        console.log(Book);
+        addClickedItem(Book);
+    });
+
+}
+
+function addClickedItem(item){
+    let i = item.id;
     if(i==undefined){
         return 0;
     }
     // let key = i.slice(0, -1);
     // sessionStorage.setItem("clickedItem", key)
-
-    let imgPath = item.bookImage.slice(-14);
 
     console.log(item);
     let mainBook = document.getElementById("one-book");
@@ -430,7 +379,7 @@ function clickedItem(item){
     let imgContainer = document.createElement("div");
     imgContainer.classList.add("item-elements");
     let imgFile = document.createElement("img");
-    imgFile.setAttribute('src', "Books/"+imgPath);
+    imgFile.setAttribute('src', "data:image/jpeg;base64,"+item.bookImage);
     imgFile.setAttribute('width', "250px");
     imgContainer.appendChild(imgFile);
     mainContainer.appendChild(imgContainer);
@@ -488,7 +437,7 @@ function clickedItem(item){
     mrpDiv.appendChild(mrp);
     mrpDiv.appendChild(mrpPrice);
     priceDiscount.appendChild(mrpDiv);
-    
+
     purchaseContainer.appendChild(priceDiscount);
 
     let buyBtn = document.createElement("div");
@@ -501,7 +450,7 @@ function clickedItem(item){
         let CurrentUser = sessionStorage.getItem("currentUser");
         if("Cart" in localStorage){
             let Cart = JSON.parse(localStorage.getItem("Cart"));
-            // let myCart = 
+            // let myCart =
             let myCart = Cart[CurrentUser];
             if(!(myCart==undefined)){
                 if(myCart.includes(key)){
@@ -518,7 +467,7 @@ function clickedItem(item){
                 let btnName = document.createTextNode("ADD TO CART");
                 addToCart.appendChild(btnName);
             }
-           
+
         }
         else{
             let btnName = document.createTextNode("ADD TO CART");
@@ -542,7 +491,7 @@ function clickedItem(item){
         let CurrentUser = sessionStorage.getItem("currentUser");
         if("Wishlist" in localStorage){
             let Wishlist = JSON.parse(localStorage.getItem("Wishlist"));
-            // let myCart = 
+            // let myCart =
             let myWishlist = Wishlist[CurrentUser];
             if(!(myWishlist==undefined)){
                 if(myWishlist.includes(key)){
@@ -553,8 +502,6 @@ function clickedItem(item){
             }
             else{
                 wishlistBtn.setAttribute('src',"Images/heart-icon-pink.png");            }
-            
-           
         }
         else{
             wishlistBtn.setAttribute('src',"Images/heart-icon-pink.png");
@@ -575,7 +522,6 @@ function clickedItem(item){
 
     mainBook.replaceChild(mainContainer, mainBook.children[0]);
 
-
-    location.assign("/")
+//    location.assign("/")
 
 }

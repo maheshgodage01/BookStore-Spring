@@ -10,15 +10,9 @@ profilePopup.addEventListener("mouseover", popup);
 profilePopup.addEventListener("mouseout", closePopup);
 
 
-
-// window.allBooks = JSON.parse(sessionStorage.getItem("allUserItems"));
-
-
-
 let login = false;
 function profileBtnPopup(){
     let userName = loginCheck();
-    // console.log(typeof(userName));
 
     if(userName == null){
         // console.log("null");
@@ -79,13 +73,13 @@ function loginCheck() {
 // });
 
 function myStorePage(){
-    location.assign("admin");
+    location.assign("my-store");
 }
 function wishListPage() {
     location.assign("wishlist");
 }
 function cartPage() {
-    location.assign("mycart")
+    location.assign("my-cart")
 }
 
 
@@ -104,10 +98,9 @@ if(!("currentUser" in sessionStorage)){
     NotLoggedIn.style.display="block"
 
 }
-else if("Cart" in localStorage){
-    let Cart = JSON.parse(localStorage.getItem("Cart"));
-    let CurrentUser = sessionStorage.getItem("currentUser");
-    if(CurrentUser in Cart){
+else if(true){
+
+    if(true){
         screen.style.display="flex";
         bodyDisplay.classList.remove("background");
         NotLoggedIn.style.display="none";
@@ -136,19 +129,48 @@ else{
 
 if("currentUser" in sessionStorage){
     let CurrentUser = sessionStorage.getItem("currentUser");
-    if("Wishlist" in localStorage){
-        let Wishlist = JSON.parse(localStorage.getItem("Wishlist"));
-        // let myCart = 
-        let myWishlist = Wishlist[CurrentUser];
-        let allUserItems = JSON.parse(sessionStorage.getItem("allUserItems"));
+        fetch("/api/my-wishlist",{
+            method : 'POST',
+            body : CurrentUser,
+            headers: {
+                'Content-Type': 'application/text'
+            }
+        })
+        .then(response => {
+            if(response.ok){
+            return response.json();
+        }
+        })
+        .then(Books => {
+            console.log(Books);
+            Books.forEach(item =>{
+                console.log(item.id);
+                showItem(item);
 
-        myWishlist.forEach(key => {
-            showItem(key, allUserItems[key]);
+            });
+        })
+        .catch(error => {
+            // Handle errors that occurred during the fetch
+            console.error('Error:', error);
         });
-    }
+
+
+
+
+//    if("Wishlist" in localStorage){
+//        let Wishlist = JSON.parse(localStorage.getItem("Wishlist"));
+//        // let myCart =
+//        let myWishlist = Wishlist[CurrentUser];
+//        let allUserItems = JSON.parse(sessionStorage.getItem("allUserItems"));
+//
+//        myWishlist.forEach(key => {
+//            showItem(key, allUserItems[key]);
+//        });
+//    }
 }
 
-function showItem(i, item){
+function showItem(item){
+    let i = item.id;
 
 
     if((Object.keys(item)).length == 0){
@@ -163,7 +185,7 @@ function showItem(i, item){
     let imgContainer = document.createElement("div");
     imgContainer.classList.add("suggested-item-img");
     let imgFile = document.createElement("img");
-    imgFile.setAttribute('src', item.ImageFile);
+    imgFile.setAttribute('src', "data:image/jpeg;base64,"+item.bookImage);
     imgFile.setAttribute('id', i+"i")
     imgFile.setAttribute('onclick', "clickedItem(this.id)")
     imgContainer.appendChild(imgFile);
@@ -175,7 +197,7 @@ function showItem(i, item){
     itemPrice.classList.add("suggested-item-price");
     let priceSpan = document.createElement("span");
     priceSpan.setAttribute('id', i+"a");
-    let priceCalculate = item.MRP - ((item.MRP/100)*item.Discount);
+    let priceCalculate = item.price - ((item.price/100)*item.discount);
     let price= document.createTextNode("₹"+priceCalculate);
     priceSpan.appendChild(price);
     itemPrice.appendChild(priceSpan);
@@ -188,7 +210,7 @@ function showItem(i, item){
     let mrpSpan = document.createElement("span");
     mrpSpan.classList.add("suggested-item-mrp-line-through");
     mrpSpan.setAttribute('id', i+"b");
-    let mrpValue = document.createTextNode("₹"+item.MRP);
+    let mrpValue = document.createTextNode("₹"+item.price);
     mrpSpan.appendChild(mrpValue);
     itemMrpContainer.appendChild(mrpSpan);
     priceContainer.appendChild(itemMrpContainer);
@@ -246,20 +268,20 @@ function showItem(i, item){
             let myWishlist = Wishlist[CurrentUser];
             if(myWishlist.includes(i)){
                 console.log("already in Wishlist");
-                wishlistIcon.setAttribute('src', "./Resources/Images/heart-icon-filled.png");
+                wishlistIcon.setAttribute('src', "Images/heart-icon-filled.png");
             }
             else{
-                wishlistIcon.setAttribute('src', "./Resources/Images/heart-icon-pink.png");
+                wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
             }
            
         }
         else{
-            wishlistIcon.setAttribute('src', "./Resources/Images/heart-icon-pink.png");
+            wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
 
         }
     }
     else{
-        wishlistIcon.setAttribute('src', "./Resources/Images/heart-icon-pink.png");
+        wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
     }
     // wishlistIcon.setAttribute('src', "./Resources/Images/heart-icon-pink.png");
     // wishlistIcon.setAttribute("onclick", "addToWishlist(this.id)");
@@ -287,7 +309,7 @@ function removeFromWishlist(id){
         console.log(myWishlist);
         localStorage.setItem("Wishlist",JSON.stringify(Wishlist));
         console.log("removed from wishlist");
-        imgNode.setAttribute('src', "./Resources/Images/heart-icon-pink.png")
+        imgNode.setAttribute('src', "Images/heart-icon-pink.png")
     }
     location.reload();
 }

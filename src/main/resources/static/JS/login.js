@@ -27,16 +27,20 @@ function validateAccount() {
         if (!response.ok) {
           throw new Error(`Network response was not ok. Status: ${response.status}`);
         }
-        return response.json(); // Parse the JSON response
+        return response.text(); // Parse the JSON response
         })
         .then(response =>{
-        console.log(typeof(response));
-            if(response){
+        console.log(response);
+            if(response=="True"){
                 console.log("Success login");
                 sessionStore(username);
                 location.assign("/");
             }
+            else if(response == "TrueFalse"){
+                alert("Incorrect Password");
+            }
             else{
+                alert("User not Found!! SIGNUP");
                 console.log("Login Failed,");
             }
         })

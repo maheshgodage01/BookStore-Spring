@@ -14,6 +14,45 @@ public class Cart {
     @Column(name = "book-id")
     private int bookId;
 
+    public Cart(int id, String userId, int bookId) {
+        this.id = id;
+        this.userId = userId;
+        this.bookId = bookId;
+    }
+    public Cart(){}
+
+    @Override
+    public String toString() {
+        return "Cart{" +
+                "id=" + id +
+                ", userId='" + userId + '\'' +
+                ", bookId=" + bookId +
+                '}';
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public int getBookId() {
+        return bookId;
+    }
+
+    public void setBookId(int bookId) {
+        this.bookId = bookId;
+    }
 }
 
 

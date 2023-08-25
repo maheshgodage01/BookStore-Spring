@@ -5,7 +5,7 @@ let bodyDisplay = document.getElementById("body");
 let EmptyCart = document.getElementById("empty-cart");
 let NotLoggedIn = document.getElementById("not-logged-in");
 
-
+let isCartEmpty = false;
 
 if(!("currentUser" in sessionStorage)){
     screen.style.display="none";
@@ -13,10 +13,8 @@ if(!("currentUser" in sessionStorage)){
     NotLoggedIn.style.display="block"
 
 }
-else if("Cart" in localStorage){
-    let Cart = JSON.parse(localStorage.getItem("Cart"));
-    let CurrentUser = sessionStorage.getItem("currentUser");
-    if(CurrentUser in Cart){
+else if(!isCartEmpty){
+    if(!isCartEmpty){
         screen.style.display="flex";
         bodyDisplay.classList.remove("background");
         NotLoggedIn.style.display="none";
@@ -29,8 +27,7 @@ else if("Cart" in localStorage){
         NotLoggedIn.style.display="none";
 
     }
-    // screen.style.display="none"
-    // bodyDisplay.classList.add("background");
+
 }
 else{
     screen.style.display="none"
@@ -42,77 +39,43 @@ window.Amount=0;
 if("currentUser" in sessionStorage){
     console.log("currentuser");
     let CurrentUser = sessionStorage.getItem("currentUser");
-    if("Cart" in localStorage){
-        console.log("mycart");
-
-        let Cart = JSON.parse(localStorage.getItem("Cart"));
-        if(CurrentUser in Cart){
-            let myCart = Cart[CurrentUser];
-            console.log(myCart);
-            let allUserItems = JSON.parse(sessionStorage.getItem("allUserItems"));
-            // console.log(keys);
-            Amount=0;
-            myCart.forEach(key=>{
-                Amount += addItem(key, allUserItems[key]);
-                
-                let TotalAmount = document.getElementById("final-amount");
-                let finalAmount = document.createTextNode("₹" + Amount.toFixed(2)+"/-");
-                TotalAmount.replaceChild(finalAmount, TotalAmount.childNodes[0]);
-
-            });
+    fetch("/api/my-cart",{
+        method : 'POST',
+        body : CurrentUser,
+        headers: {
+            'Content-Type': 'application/text'
         }
-        
-
+    })
+    .then(response => {
+        if(response.ok){
+        return response.json();
     }
-    // else{
-    //     document.querySelector("body").classList.add("background");
-    // }
-
-
-
-
-
-    // let storeArray = JSON.parse(localStorage.getItem("BookRecord"));
-    // // let CurrentUser = sessionStorage.getItem("currentUser");
-
-    // if(CurrentUser in storeArray){
-    //     let CurrentUserData = Object.assign({}, storeArray[CurrentUser]);
-    //     // console.log(CurrentUserData);
-    //     // console.log(Object.keys(CurrentUserData));   
-    //     let dataList = Object.keys(CurrentUserData);  
-    //     for(i in dataList){
-    //         i=dataList[i];
-    //         // console.log(Object.keys(CurrentUserData));     
-
-    //         // console.log(parseInt(i), CurrentUserData[i]);
-    //         // console.log(typeof(i));
-    //         // console.log(CurrentUserData[i]);
-    //         addItem(i, CurrentUserData[i]);
-    //     }
-    // }
-
-    // storeArray.forEach(addItem);
+    })
+    .then(Books => {
+        console.log(Books);
+        let Amount = 0;
+        Books.forEach(item =>{
+            console.log(item.id);
+            Amount += addItem(item);
+            let TotalAmount = document.getElementById("final-amount");
+            let finalAmount = document.createTextNode("₹" + Amount.toFixed(2)+"/-");
+            TotalAmount.replaceChild(finalAmount, TotalAmount.childNodes[0]);
+        });
+    })
+    .catch(error => {
+        // Handle errors that occurred during the fetch
+        console.error('Error:', error);
+    });
 }
 
 
-function addItem(i, item){
-    console.log(i)
+
+function addItem(item){
     console.log(item);
     if(item == undefined){
         return 0;
     }
-
-    // let storeArray = JSON.parse(localStorage.getItem("BookRecord"));
-    // let CurrentUser = sessionStorage.getItem("currentUser");
-    // console.log("Current user :"+CurrentUser);
-
-    // let CurrentUserData1 = Object.assign({}, storeArray[CurrentUser]);
-    // console.log("CurrentUser Data :" + storeArray[CurrentUser]);
-
-    // let item = Object.assign({}, CurrentUserData1[i]);
-
-    // console.log(item);
-    // console.log(typeof(item));
+    let i= item.id;
     
     let itemList = document.getElementById("all-item-list");
 
@@ -124,13 +87,7 @@ function addItem(i, item){
 
     let btnDiv = document.createElement("div");
     btnDiv.classList.add("update-delete-btn");
-    // let updateBtn = document.createElement("button");
-    // updateBtn.classList.add("update-btn");
-    // updateBtn.setAttribute('id', i+"a");
-    // updateBtn.setAttribute('onClick', "updateItem(this.id)");
-    // let updateBtnName = document.createTextNode("UPDATE");
-    // updateBtn.appendChild(updateBtnName);
-    // btnDiv.appendChild(updateBtn);
+
     let deleteBtn = document.createElement("button");
     deleteBtn.classList.add("delete-btn");
     // deleteBtn.classList.add(""+i);
@@ -142,11 +99,10 @@ function addItem(i, item){
 
     OneItem.appendChild(btnDiv);
 
-
     let imgContainer = document.createElement("div");
     imgContainer.classList.add("all-items-item");
     let imgSrc = document.createElement("img");
-    imgSrc.setAttribute('src',item.ImageFile);
+    imgSrc.setAttribute('src',"data:image/jpeg;base64,"+item.bookImage);
     imgContainer.appendChild(imgSrc);
     OneItem.appendChild(imgContainer);
 
@@ -162,12 +118,11 @@ function addItem(i, item){
     mrpSpan.appendChild(rupee);
     // price.appendChild(mrpSpan);
 
-    let priceCalculate = item.MRP - ((item.MRP/100)*item.Discount);
-    let actualPrice = document.createTextNode("₹"+priceCalculate);
+    let priceCalculate = item.price - ((item.price/100)*item.discount);
+    let actualPrice = document.createTextNode("₹"+priceCalculate.toFixed(2));
 
     price.appendChild(actualPrice);
     priceContainer.appendChild(price);
-
 
     let mrp = document.createElement("div");
     mrp.classList.add("item-mrp");
@@ -177,7 +132,7 @@ function addItem(i, item){
     let mrpDiv = document.createElement("span");
     mrpDiv.classList.add("item-mrp-line-through");
     // console.log(item.MRP);
-    let mrpPrice = item.MRP;
+    let mrpPrice = item.price;
     let Mrpval = document.createTextNode(mrpPrice);
     mrpDiv.appendChild(Mrpval);
 
@@ -193,12 +148,12 @@ function addItem(i, item){
     let ItemListCheckout = document.getElementById("item-list");
     let listItemContainer = document.createElement("li");
     let itemName = document.createElement("span");
-    let Book = document.createTextNode(item.Title);
+    let Book = document.createTextNode(item.title);
     itemName.appendChild(Book);
     listItemContainer.appendChild(itemName);
 
     let itemAmount = document.createElement("span");
-    let Amount = document.createTextNode("₹"+priceCalculate);
+    let Amount = document.createTextNode("₹"+priceCalculate.toFixed(2));
     // Amount.setAttribute('style', "\"font-weight: 600;\"");
     itemAmount.appendChild(Amount);
 
@@ -344,13 +299,13 @@ function loginCheck() {
 }
 
 function myStorePage(){
-    location.assign("admin");
+    location.assign("my-store");
 }
 function wishListPage() {
     location.assign("wishlist");
 }
 function cartPage() {
-    location.assign("mycart")
+    location.assign("my-cart")
 }
 
 
@@ -461,8 +416,6 @@ applyCouponBtn.addEventListener("click", ()=>{
     }
     
 });
-
-
 
 let checkOut = document.getElementById("checkout-btn");
 checkOut.addEventListener("click", ()=>{

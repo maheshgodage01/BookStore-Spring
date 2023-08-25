@@ -186,7 +186,6 @@ addForm.addEventListener("submit", f =>{
     fetch("/my-store/add", {
         method : 'POST',
         body: formData,
-
     })
     .then(response =>{
         console.log('Response:', response)
@@ -424,13 +423,13 @@ function loginCheck() {
 }
 
 function myStorePage(){
-    location.assign("admin.html");
+    location.assign("my-store");
 }
 function wishListPage() {
     location.assign("wishlist");
 }
 function cartPage() {
-    location.assign("mycart")
+    location.assign("my-cart")
 }
 let logOutBtn = document.getElementById("logout");
 

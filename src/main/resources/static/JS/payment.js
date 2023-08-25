@@ -4,8 +4,6 @@ console.log(TotalAmount);
 
 let amountContainer = document.getElementById("final-amount");
 
-
-
 let rent = document.getElementById("radio-11");
 let buy = document.getElementById("radio-22");
 
@@ -20,7 +18,6 @@ buy.addEventListener("click", ()=>{
     TotalAmount = JSON.parse(sessionStorage.getItem("TotalAmount"));
     amountContainer.innerHTML="₹"+TotalAmount+"/-"
 });
-
 
 // if(rent.checked){
 //     amountContainer.innerHTML="₹"+TotalAmount+"/-"
