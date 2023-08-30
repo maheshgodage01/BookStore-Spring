@@ -31,6 +31,7 @@ if("currentUser" in sessionStorage){
         Books.forEach(item =>{
             console.log(item.id);
             addItem(item);
+//            location.reload();
         });
         })
         .catch(error => {
@@ -140,9 +141,6 @@ function addItem(item){
 }
 
 
-
-
-
 addForm.addEventListener("submit", f =>{
     f.preventDefault();
 
@@ -153,6 +151,7 @@ addForm.addEventListener("submit", f =>{
     let discount = document.getElementById("discount").value;
     let category = document.getElementById("item-category").value;
     let description = document.getElementById("description").value;
+    let condition = document.getElementById("item-condition").value;
     const bookImage = fileInput.files[0];
     const filePath = bookImage ? bookImage.name : '';
     console.log(bookImage);
@@ -178,24 +177,28 @@ addForm.addEventListener("submit", f =>{
     formData.append("price",parseInt (mrp));
     formData.append("discount", parseInt(discount));
     formData.append("category", category);
+    formData.append("condition", condition);
     formData.append("description", description);
     formData.append("filePath", filePath);
     formData.append("bookImage", bookImage);
-    formData.append("adminId", adminId)
+    formData.append("adminId", adminId);
+
 
     fetch("/my-store/add", {
         method : 'POST',
         body: formData,
     })
     .then(response =>{
-        console.log('Response:', response)
+        console.log('Response:', response);
+        location.assign("my-store");
     })
     .catch(error => {
         console.error('Error submitting data:', error);
     });
     console.log("Success signup");
 
-    location.reload();
+    location.assign("my-store");
+
 })
 
 
@@ -208,34 +211,49 @@ function updateItem(id){
     window.location.replace("admin-editItem");
 
     // console.log(id);
-
 }
 
 function deleteItem(id){
-    let elementId = parseInt(id);
-    // console.log(elementId);
-    let storeArray = JSON.parse(localStorage.getItem("BookRecord"));
-    let CurrentUser = sessionStorage.getItem("currentUser");
-    // console.log(CurrentUser);
-    let CurrentUserData = Object.assign({}, storeArray[CurrentUser]);
-    // console.log(CurrentUserData);
+    let bookId = parseInt(id);
+    let formData = new FormData();
+    formData.append("id", bookId);
 
-
-    // sessionStorage.setItem("clickedElement", id);
-    if(elementId in CurrentUserData){
-        // console.log("inside f");
-        // console.log(Object.keys(CurrentUserData));
-        CurrentUserData[elementId] = {};
-        // console.log(Object.keys(CurrentUserData));
-        // storeArray[CurrentUser]=Object.assign({}, CurrentUserData);
-        storeArray[CurrentUser]=CurrentUserData;
-        console.log(typeof(storeArray[CurrentUser]));
-        // console.log(storeArray);
-        localStorage.setItem("BookRecord", JSON.stringify(storeArray));
-        location.reload();
-        console.log("updated");
+    fetch("/my-store/delete",{
+        method : 'POST',
+        body : formData,
+    })
+    .then(response => {
+        if(response.ok){
+        console.log("Deleted");
+        return response.json();
     }
+    })
 
+    alert("Book Deleted");
+    location.assign("my-store");
+
+//    let elementId = parseInt(id);
+//    // console.log(elementId);
+//    let storeArray = JSON.parse(localStorage.getItem("BookRecord"));
+//    let CurrentUser = sessionStorage.getItem("currentUser");
+//    // console.log(CurrentUser);
+//    let CurrentUserData = Object.assign({}, storeArray[CurrentUser]);
+//    // console.log(CurrentUserData);
+//
+//    // sessionStorage.setItem("clickedElement", id);
+//    if(elementId in CurrentUserData){
+//        // console.log("inside f");
+//        // console.log(Object.keys(CurrentUserData));
+//        CurrentUserData[elementId] = {};
+//        // console.log(Object.keys(CurrentUserData));
+//        // storeArray[CurrentUser]=Object.assign({}, CurrentUserData);
+//        storeArray[CurrentUser]=CurrentUserData;
+//        console.log(typeof(storeArray[CurrentUser]));
+//        // console.log(storeArray);
+//        localStorage.setItem("BookRecord", JSON.stringify(storeArray));
+//        location.reload();
+//        console.log("updated");
+//    }
 
 }
 

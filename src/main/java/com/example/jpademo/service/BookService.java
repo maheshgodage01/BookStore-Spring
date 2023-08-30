@@ -27,6 +27,7 @@ public class BookService {
         return "success";
     }
 
-
-
+    public void deleteBookById(int id) {
+        bookRepository.deleteById(id);
+    }
 }

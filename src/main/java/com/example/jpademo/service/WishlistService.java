@@ -19,4 +19,11 @@ public class WishlistService {
     public void addToWishlist(Wishlist wishlist){
         wishlistRepository.save(wishlist);
     }
+
+    public void deleteById(int bookId) {
+        System.out.println("Delete by id called");
+        wishlistRepository.deleteById(bookId);
+    }
 }
+
+

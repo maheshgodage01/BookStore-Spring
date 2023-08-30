@@ -22,12 +22,38 @@ public class Book {
     private int discount;
     @Column
     private String category;
-    @Column
+
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String description;
+    @Column(name = "book-condition")
+    private String condition;
+
+    public Book(int id, String title, String authorName, String storeName, int price, int discount, String category, String description, String condition, String adminId, String bookImage) {
+        this.id = id;
+        this.title = title;
+        this.authorName = authorName;
+        this.storeName = storeName;
+        this.price = price;
+        this.discount = discount;
+        this.category = category;
+        this.description = description;
+        this.condition = condition;
+        this.adminId = adminId;
+        this.bookImage = bookImage;
+    }
+
     @Column(name = "admin-id")
     private String adminId;
     @Column(name = "book-image")
     private String bookImage;
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public void setCondition(String condition) {
+        this.condition = condition;
+    }
 
     @Override
     public String toString() {
@@ -40,11 +66,11 @@ public class Book {
                 ", discount=" + discount +
                 ", category='" + category + '\'' +
                 ", description='" + description + '\'' +
+                ", condition='" + condition + '\'' +
                 ", adminId='" + adminId + '\'' +
                 ", bookImage='" + bookImage + '\'' +
                 '}';
     }
-
 
     public String getAdminId() {
         return adminId;
@@ -54,17 +80,6 @@ public class Book {
         this.adminId = adminId;
     }
 
-    public Book(int id, String title, String authorName, String storeName, int price, int discount, String category, String description, String bookImage) {
-        this.id = id;
-        this.title = title;
-        this.authorName = authorName;
-        this.storeName = storeName;
-        this.price = price;
-        this.discount = discount;
-        this.category = category;
-        this.description = description;
-        this.bookImage = bookImage;
-    }
 
     public Book(){}
 
@@ -140,6 +155,5 @@ public class Book {
     public void setBookImage(String bookImage) {
         this.bookImage = bookImage;
     }
-
 
 }

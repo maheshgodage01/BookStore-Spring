@@ -2,67 +2,35 @@ let clickedElement = sessionStorage.getItem("clickedElement");
 
 console.log(clickedElement);
 
-
-let myStore = document.getElementById("store");
-let storeArray = JSON.parse(localStorage.getItem("BookRecord"));
 let CurrentUser = sessionStorage.getItem("currentUser");
 
-let CurrentUserData = Object.assign({}, storeArray[CurrentUser]);
-let myObj = Object.assign({}, CurrentUserData[clickedElement]);
+let formData = new FormData();
+formData.append("id", clickedElement);
 
-console.log(myObj);
+fetch("/api/get-book",{
+    method : 'POST',
+    body : formData,
+})
+.then(response => {
+    if(response.ok){
+    return response.json();
+}
+})
+.then(Book => {
+    console.log(Book);
+    document.getElementById("item-title").value = Book.title;
+    document.getElementById("author-name").value = Book.authorName;
+    document.getElementById("store-name").value  = Book.storeName;
+    document.getElementById("mrp").value = Book.price;
+    document.getElementById("discount").value = Book.discount;
+    document.getElementById("item-category").value = Book.category;
+    document.getElementById("item-condition").value = Book.condition;
+    document.getElementById("description").value=Book.description;
 
-document.getElementById("item-title").value = myObj.Title;
-document.getElementById("author-name").value = myObj.Author;
-document.getElementById("store-name").value  = myObj.StoreName;
-document.getElementById("mrp").value = myObj.MRP;
-document.getElementById("discount").value = myObj.Discount;
-document.getElementById("item-category").value = myObj.Category;
-document.getElementById("description").value=myObj.Description;
-
-document.getElementById("item-image").setAttribute('src', myObj.ImageFile);
-
-
-
-
-// myObj = {
-//     Title : itemTitle,
-//     Designer : designerName,
-//     StoreName : storeName,
-//     MRP : mrp,
-//     Discount : discount,
-//     Category : category,
-// }
-
-const fileInput = document.getElementById("file-input");
-
-fileInput.addEventListener("change", function() {
-    console.log("entered");
-    const fileInput = this.files[0];
-    const reader= new FileReader();
-
-    reader.readAsDataURL(fileInput);
-    reader.addEventListener("load", ()=>{
-        // let itemTitle = document.getElementById("item-title").value;
-        // let designerName  = document.getElementById("designer-name").value;
-        // let storeName = document.getElementById("store-name").value;
-        // let mrp = document.getElementById("mrp").value;
-        // let discount = document.getElementById("discount").value;
-        // let category = document.getElementById("item-category").value;
-
-        document.getElementById("item-image").setAttribute('src', reader.result);
-
-        myObj.ImageFile=reader.result;
-        
-        console.log("Updated");
-    });
+//    document.getElementById("item-image").setAttribute('src', Book.bookImage);
 
 });
 
-// let  UpdateBtn = document.getElementById("update-item-btn");
-// UpdateBtn.addEventListener("click", ()=>{
-
-// });
 
 function urlNavigate(){
     let itemTitle = document.getElementById("item-title").value;
@@ -72,23 +40,40 @@ function urlNavigate(){
     let discount = document.getElementById("discount").value;
     let category = document.getElementById("item-category").value;
     let description = document.getElementById("description").value;
+    let condition = document.getElementById("item-condition").value;
 
 
-    myObj.Title=itemTitle;
-    myObj.Author=authorName;
-    myObj.StoreName = storeName;
-    myObj.MRP = mrp;
-    myObj.Discount = discount;
-    myObj.Category = category;
-    myObj.Description = description;
 
-    console.log("Update clicked");
-    CurrentUserData[clickedElement] = myObj;
-    storeArray[CurrentUser] = CurrentUserData;
-    localStorage.setItem("BookRecord", JSON.stringify(storeArray));
-    document.getElementById("admin-page-url").click();
-    console.log("record updated");
-    // window.location.replace("index");
-    // document.getElementById("admin-page-url").click();   
+    let adminId = sessionStorage.getItem("currentUser");
+    console.log(adminId);
+
+
+    let formData = new FormData();
+    formData.append("id", clickedElement);
+    formData.append("title", itemTitle);
+    formData.append("authorName", authorName);
+    formData.append("storeName", storeName);
+    formData.append("price",parseInt (mrp));
+    formData.append("discount", parseInt(discount));
+    formData.append("category", category);
+    formData.append("condition", condition);
+    formData.append("description", description);
+
+    formData.append("adminId", adminId);
+
+
+    fetch("/my-store/update", {
+        method : 'POST',
+        body: formData,
+    })
+    .then(response =>{
+        console.log('Response:', response)
+    })
+    .catch(error => {
+        console.error('Error submitting data:', error);
+    });
+    console.log("Success signup");
+
+    location.assign("my-store");
 }
 

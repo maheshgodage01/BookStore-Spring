@@ -26,6 +26,11 @@ public class HomeController {
     public String admin(){
         return "admin";
     }
+
+    @GetMapping("/admin-editItem")
+    public String adminEditItem(){
+        return "admin-editItem";
+    }
     @GetMapping("/wishlist")
     public String wishList(){
         return "wishlist";
