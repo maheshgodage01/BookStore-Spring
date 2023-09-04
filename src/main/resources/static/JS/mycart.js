@@ -415,7 +415,6 @@ applyCouponBtn.addEventListener("click", ()=>{
     else{
         location.reload();
     }
-    
 });
 
 let checkOut = document.getElementById("checkout-btn");
@@ -436,6 +435,7 @@ checkOut.addEventListener("click", ()=>{
         .then(Books => {
             let allBooks = []
             let currentUser = sessionStorage.getItem("currentUser");
+            console.log(Books);
             Books.forEach(book => {
                 allBooks.push(book.id);
                 sessionStorage.setItem("CartItems", JSON.stringify(allBooks));
@@ -452,15 +452,14 @@ checkOut.addEventListener("click", ()=>{
                 });
 
             })
+            sessionStorage.setItem("CartItems", JSON.stringify(allBooks));
+            location.assign("payment");
 
         })
-
-    console.log(window.Amount.toFixed(2));
-    sessionStorage.setItem("TotalAmount", JSON.stringify(Amount));
-    location.assign("payment");
+        .catch(error => {
+            console.error('Error:', error);
+        });
 });
-
-
 
 
 
@@ -518,8 +517,7 @@ function myOrders(item){
         let OneItem = document.createElement("div");
         OneItem.classList.add("one-item");
         OneItem.setAttribute('id', ""+i);
-        OneItem.setAttribute('onmouseover', "editItem(this.id)");
-        OneItem.setAttribute('onmouseout', "notEditItem(this.id)");
+
 
 //        let btnDiv = document.createElement("div");
 //        btnDiv.classList.add("update-delete-btn");
