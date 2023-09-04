@@ -24,6 +24,10 @@ public class WishlistService {
         System.out.println("Delete by id called");
         wishlistRepository.deleteById(bookId);
     }
+
+    public void deleteByBookId(int id) {
+        wishlistRepository.deleteById(id);
+    }
 }
 
 

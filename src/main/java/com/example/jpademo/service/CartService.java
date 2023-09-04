@@ -21,5 +21,8 @@ public class CartService {
        return "Success";
     }
 
+    public void deleteByBookId(int id) {
+        cartRepository.deleteById(id);
+    }
 }
 

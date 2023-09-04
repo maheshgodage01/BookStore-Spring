@@ -157,21 +157,11 @@ if("currentUser" in sessionStorage){
 
 
 
-//    if("Wishlist" in localStorage){
-//        let Wishlist = JSON.parse(localStorage.getItem("Wishlist"));
-//        // let myCart =
-//        let myWishlist = Wishlist[CurrentUser];
-//        let allUserItems = JSON.parse(sessionStorage.getItem("allUserItems"));
-//
-//        myWishlist.forEach(key => {
-//            showItem(key, allUserItems[key]);
-//        });
-//    }
+
 }
 
 function showItem(item){
     let i = item.id;
-
 
     if((Object.keys(item)).length == 0){
         return 0;
@@ -187,7 +177,7 @@ function showItem(item){
     let imgFile = document.createElement("img");
     imgFile.setAttribute('src', "data:image/jpeg;base64,"+item.bookImage);
     imgFile.setAttribute('id', i+"i")
-    imgFile.setAttribute('onclick', "clickedItem(this.id)")
+//    imgFile.setAttribute('onclick', "clickedItem(this.id)")
     imgContainer.appendChild(imgFile);
     mainContainer.appendChild(imgContainer);
 
@@ -222,7 +212,7 @@ function showItem(item){
     let cartContainer = document.createElement("button");
     cartContainer.classList.add("suggested-add-to-bag");
     cartContainer.setAttribute('id', i+"c");
-    cartContainer.setAttribute("onclick", "addToCart(this.id)");
+//    cartContainer.setAttribute("onclick", "addToCart(this.id)");
 
     if("currentUser" in sessionStorage){
         let CurrentUser = sessionStorage.getItem("currentUser");
@@ -260,31 +250,31 @@ function showItem(item){
     wishlistContainer.setAttribute('onclick', "removeFromWishlist(this.id)");
     let wishlistIcon = document.createElement("img");
 
-    if("currentUser" in sessionStorage){
-        let CurrentUser = sessionStorage.getItem("currentUser");
-        if("Wishlist" in localStorage){
-            let Wishlist = JSON.parse(localStorage.getItem("Wishlist"));
-            // let myCart = 
-            let myWishlist = Wishlist[CurrentUser];
-            if(myWishlist.includes(i)){
-                console.log("already in Wishlist");
-                wishlistIcon.setAttribute('src', "Images/heart-icon-filled.png");
-            }
-            else{
-                wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
-            }
-           
-        }
-        else{
-            wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
-
-        }
-    }
-    else{
-        wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
-    }
-    // wishlistIcon.setAttribute('src', "./Resources/Images/heart-icon-pink.png");
-    // wishlistIcon.setAttribute("onclick", "addToWishlist(this.id)");
+//    if("currentUser" in sessionStorage){
+//        let CurrentUser = sessionStorage.getItem("currentUser");
+//        if("Wishlist" in localStorage){
+//            let Wishlist = JSON.parse(localStorage.getItem("Wishlist"));
+//            // let myCart =
+//            let myWishlist = Wishlist[CurrentUser];
+//            if(myWishlist.includes(i)){
+//                console.log("already in Wishlist");
+//                wishlistIcon.setAttribute('src', "Images/heart-icon-filled.png");
+//            }
+//            else{
+//                wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
+//            }
+//
+//        }
+//        else{
+//            wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
+//
+//        }
+//    }
+//    else{
+//        wishlistIcon.setAttribute('src', "Images/heart-icon-pink.png");
+//    }
+     wishlistIcon.setAttribute('src', "/Images/heart-icon-filled.png");
+//     wishlistIcon.setAttribute("onclick", "addToWishlist(this.id)");
     wishlistContainer.appendChild(wishlistIcon);
     buyBtnContainer.appendChild(wishlistContainer);
 
@@ -294,23 +284,25 @@ function showItem(item){
 }
 
 function removeFromWishlist(id){
-    let key = id.slice(0, -1);
-    let Wishlist = JSON.parse(localStorage.getItem("Wishlist"));
-    let imgNode = document.getElementById(id).childNodes[0];
-    let CurrentUser = sessionStorage.getItem("currentUser");
-    console.log(imgNode.getAttribute('src'))
-            // let myCart = 
-    let myWishlist = Wishlist[CurrentUser];
-    if(myWishlist.includes(key)){
-        console.log(myWishlist);
-        let index = myWishlist.indexOf(key);
-        myWishlist.splice(index, 1);
-        Wishlist[CurrentUser] = myWishlist;
-        console.log(myWishlist);
-        localStorage.setItem("Wishlist",JSON.stringify(Wishlist));
-        console.log("removed from wishlist");
-        imgNode.setAttribute('src', "Images/heart-icon-pink.png")
-    }
+    id = parseInt(id);
+
+    let currentUser = sessionStorage.getItem("currentUser");
+    let formData = new FormData();
+    formData.append("bookId", id);
+    formData.append("userName", currentUser);
+
+    fetch("/api/remove-from-wishlist", {
+    method : 'POST',
+    body : formData
+    })
+    .then(response => {
+        console.log(response);
+        console.log("Item removed from wishlist");
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+    alert("Removed from Wishlist");
     location.reload();
 }
 
@@ -321,3 +313,4 @@ logOutBtn.addEventListener("click", ()=>{
     sessionStorage.removeItem("currentUser");
     location.reload();
 });
+

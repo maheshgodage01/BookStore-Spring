@@ -2,9 +2,11 @@ package com.example.jpademo.controller;
 
 import com.example.jpademo.model.Book;
 import com.example.jpademo.model.Cart;
+import com.example.jpademo.model.DeletedBook;
 import com.example.jpademo.model.Wishlist;
 import com.example.jpademo.service.BookService;
 import com.example.jpademo.service.CartService;
+import com.example.jpademo.service.DeletedBookService;
 import com.example.jpademo.service.WishlistService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,6 +26,8 @@ import java.util.*;
 public class BookController {
     @Autowired
     BookService bookService;
+    @Autowired
+    DeletedBookService deletedBookService;
 
     @Autowired
     CartService cartService;
@@ -49,6 +53,9 @@ public class BookController {
         List<Book> books = bookService.getAllBooks();
         List<Map<String, String>> bookList = new ArrayList<>();
         for (Book book : books){
+                if(book == null){
+                    continue;
+                }
                 bookList.add(extractBook(book));
         }
         return ResponseEntity.ok(bookList);
@@ -62,6 +69,9 @@ public class BookController {
         System.out.println(currentUser);
 
         for (Book book : allBooks){
+            if(book == null){
+                continue;
+            }
             System.out.println(book.getAdminId());
             if(Objects.equals(book.getAdminId(), currentUser)){
                 userBooks.add(extractBook(book));
@@ -131,7 +141,6 @@ public class BookController {
             @RequestParam("description") String description,
             @RequestParam("adminId") String adminId){
 
-
         Book book = bookService.getBookById(id);
 
         System.out.println("add book function");
@@ -155,12 +164,53 @@ public class BookController {
     @PostMapping("my-store/delete")
     @ResponseBody
     public String deleteBook(@RequestParam("id") int id){
+        Book book = bookService.getBookById(id);
+        DeletedBook deletedBook = new DeletedBook();
+        deletedBook.setId(book.getId());
+        deletedBook.setTitle(book.getTitle());
+        deletedBook.setAuthorName(book.getAuthorName());
+        deletedBook.setCategory(book.getCategory());
+        deletedBook.setDescription(book.getDescription());
+        deletedBook.setStoreName(book.getStoreName());
+        deletedBook.setCondition(book.getCondition());
+        deletedBook.setPrice(book.getPrice());
+        deletedBook.setDiscount(book.getDiscount());
+        deletedBook.setBookImage(book.getBookImage());
+
+        deletedBookService.addBook(deletedBook);
+
         bookService.deleteBookById(id);
         return "Deleted";
     }
+    @PostMapping("/api/remove-from-cart")
+    @ResponseBody
+    public String removeFromCart(@RequestParam("bookId") int bookId, @RequestParam("userName") String userName){
+        List<Cart> myCart = cartService.getAllCart(userName);
 
+        for(Cart cart: myCart){
+            if(cart.getBookId() == bookId){
+                cartService.deleteByBookId(cart.getId());
+                return "Success";
+            }
+        }
+        return  "Not fount";
 
+    }
 
+    @PostMapping("/api/remove-from-wishlist")
+    @ResponseBody
+    public String removeFromWishlist(@RequestParam("bookId") int bookId, @RequestParam("userName") String userName){
+        List<Wishlist> allWishlist = wishlistService.getAllWishlist(userName);
+
+        for(Wishlist wishlist: allWishlist){
+            if(wishlist.getBookId() == bookId){
+                wishlistService.deleteByBookId(wishlist.getId());
+                return "Success";
+            }
+        }
+        return  "Not fount";
+
+    }
 
 
 
@@ -177,7 +227,9 @@ public class BookController {
         System.out.println(allCart);
         for (Cart cart : allCart){
             int bookId = cart.getBookId();
-            userBooks.add(extractBook(bookService.getBookById(bookId)));
+            Book book = bookService.getBookById(bookId);
+            if(book != null)
+                userBooks.add(extractBook(book));
         }
         return ResponseEntity.ok(userBooks);
     }
@@ -216,7 +268,9 @@ public class BookController {
         System.out.println(allWishlist);
         for (Wishlist wishlist : allWishlist){
             int bookId = wishlist.getBookId();
-            userBooks.add(extractBook(bookService.getBookById(bookId)));
+            Book book = bookService.getBookById(bookId);
+            if(book != null)
+                userBooks.add(extractBook(book));
         }
         return ResponseEntity.ok(userBooks);
     }
@@ -257,7 +311,6 @@ public class BookController {
 
         for (Wishlist wishlist: allWishlist){
             if(wishlist.getBookId()==bookId){
-
                 wishlistService.deleteById(wishlist.getId());
                 return false;
             }
@@ -272,6 +325,8 @@ public class BookController {
 
     public Map<String, String> extractBook(Book book) throws IOException {
         Map<String, String> response = new HashMap<>();
+
+
 
         response.put("id", Integer.toString(book.getId()));
         response.put("title", book.getTitle());
@@ -293,8 +348,6 @@ public class BookController {
 
         return response;
     }
-
-
 
 
 

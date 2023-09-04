@@ -7,6 +7,8 @@ let NotLoggedIn = document.getElementById("not-logged-in");
 
 let isCartEmpty = false;
 
+sessionStorage.removeItem("CartItems");
+
 if(!("currentUser" in sessionStorage)){
     screen.style.display="none";
     bodyDisplay.classList.add("background");
@@ -167,32 +169,31 @@ function addItem(item){
 
 
 function deleteItem(id){
-    let elementId = id.slice(0, -1);
+    id = parseInt(id);
     console.log(id);
-    // let elementId = parseInt(id);
-    console.log(elementId);
-    // let storeArray = JSON.parse(localStorage.getItem("BookRecord"));
-    let CurrentUser = sessionStorage.getItem("currentUser");
-    // console.log(CurrentUser);
-    // let CurrentUserData = Object.assign({}, storeArray[CurrentUser]);
-    // console.log(CurrentUserData);
-    let Cart = JSON.parse(localStorage.getItem("Cart"));
 
-    let myCart = Cart[CurrentUser];
-    if(myCart.includes(elementId)){
+    let currentUser = sessionStorage.getItem("currentUser");
+    let formData = new FormData();
+    formData.append("bookId", id);
+    formData.append("userName", currentUser);
 
-        let index = myCart.indexOf(elementId);
-        myCart.splice(index, 1);
-        // myCart.remove(elementId);
-        console.log("MyCart:"+myCart);
-        Cart[CurrentUser] = myCart;
-        localStorage.setItem("Cart", JSON.stringify(Cart));
-        location.reload();
-    }
-    else{
-        console.log(elementId+":not found");
-    }
+    fetch("/api/remove-from-cart", {
+    method : 'POST',
+    body : formData
+    })
+    .then(response => {
+        if(response.ok)
+            return response.json();
+    })
+    .then(response => {
+        console.log(response);
+        console.log("Item removed from cart");
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 
+    location.reload();
 }
 
 function editItem(id) {
@@ -419,7 +420,179 @@ applyCouponBtn.addEventListener("click", ()=>{
 
 let checkOut = document.getElementById("checkout-btn");
 checkOut.addEventListener("click", ()=>{
+    let currentUser = sessionStorage.getItem("currentUser");
+
+    fetch("/api/my-cart",{
+            method : 'POST',
+            body : currentUser,
+            headers: {
+                'Content-Type': 'application/text'
+            }
+        })
+        .then(response => {
+            if(response.ok)
+            return response.json();
+        })
+        .then(Books => {
+            let allBooks = []
+            let currentUser = sessionStorage.getItem("currentUser");
+            Books.forEach(book => {
+                allBooks.push(book.id);
+                sessionStorage.setItem("CartItems", JSON.stringify(allBooks));
+                let formData = new FormData();
+                formData.append("bookId", book.id);
+                formData.append("userName", currentUser);
+
+                fetch("/api/remove-from-cart", {
+                method : 'POST',
+                body : formData
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+            })
+
+        })
+
     console.log(window.Amount.toFixed(2));
     sessionStorage.setItem("TotalAmount", JSON.stringify(Amount));
     location.assign("payment");
 });
+
+
+
+
+
+if("currentUser" in sessionStorage){
+//    console.log("currentuser");
+    let CurrentUser = sessionStorage.getItem("currentUser");
+    fetch("/checkout/my-orders",{
+        method : 'POST',
+        body : CurrentUser,
+        headers: {
+            'Content-Type': 'application/text'
+        }
+    })
+    .then(response => {
+        if(response.ok){
+        return response.json();
+    }
+    })
+    .then(Orders => {
+        console.log(Orders);
+        Orders.forEach(item =>{
+//            console.log(item);
+                myOrders(item)
+        });
+    })
+    .catch(error => {
+        // Handle errors that occurred during the fetch
+        console.error('Error:', error);
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function myOrders(item){
+    console.log(item);
+        if(item == undefined){
+            return 0;
+        }
+        let i= item.id;
+
+        let itemList = document.getElementById("all-items");
+
+        let OneItem = document.createElement("div");
+        OneItem.classList.add("one-item");
+        OneItem.setAttribute('id', ""+i);
+        OneItem.setAttribute('onmouseover', "editItem(this.id)");
+        OneItem.setAttribute('onmouseout', "notEditItem(this.id)");
+
+//        let btnDiv = document.createElement("div");
+//        btnDiv.classList.add("update-delete-btn");
+//
+//        let deleteBtn = document.createElement("button");
+//        deleteBtn.classList.add("delete-btn");
+//        // deleteBtn.classList.add(""+i);
+//        deleteBtn.setAttribute('id', i+"b");
+//        deleteBtn.setAttribute('onClick', "deleteItem(this.id)");
+//        let deleteBtnName = document.createTextNode("REMOVE");
+//        deleteBtn.appendChild(deleteBtnName);
+//        btnDiv.appendChild(deleteBtn);
+//
+//        OneItem.appendChild(btnDiv);
+
+        let imgContainer = document.createElement("div");
+        imgContainer.classList.add("all-items-item");
+        let imgSrc = document.createElement("img");
+        imgSrc.setAttribute('src',"data:image/jpeg;base64,"+item.bookImage);
+        imgContainer.appendChild(imgSrc);
+        OneItem.appendChild(imgContainer);
+
+
+        let priceContainer = document.createElement("div");
+        priceContainer.classList.add("price");
+
+        let price = document.createElement("div");
+        price.classList.add("item-price");
+
+        let rupee = document.createTextNode("₹");
+        let mrpSpan = document.createElement("div");
+        mrpSpan.appendChild(rupee);
+        // price.appendChild(mrpSpan);
+
+        let priceCalculate = item.price - ((item.price/100)*item.discount);
+        let actualPrice = document.createTextNode("₹"+priceCalculate.toFixed(2));
+
+        price.appendChild(actualPrice);
+        priceContainer.appendChild(price);
+
+        let mrp = document.createElement("div");
+        mrp.classList.add("item-mrp");
+        let mrpText = document.createTextNode("MRP");
+        mrp.appendChild(mrpText);
+        // mrpSpan.innerHTML="₹" + item.MRP;
+        let mrpDiv = document.createElement("span");
+        mrpDiv.classList.add("item-mrp-line-through");
+        // console.log(item.MRP);
+        let mrpPrice = item.price;
+        let Mrpval = document.createTextNode(mrpPrice);
+        mrpDiv.appendChild(Mrpval);
+
+        mrpSpan.appendChild(mrpDiv);
+
+        mrp.appendChild(mrpSpan);
+        priceContainer.appendChild(mrp);
+
+        OneItem.appendChild(priceContainer);
+
+        itemList.appendChild(OneItem);
+
+//        let ItemListCheckout = document.getElementById("item-list");
+//        let listItemContainer = document.createElement("li");
+//        let itemName = document.createElement("span");
+//        let Book = document.createTextNode(item.title);
+//        itemName.appendChild(Book);
+//        listItemContainer.appendChild(itemName);
+//
+//        let itemAmount = document.createElement("span");
+//        let Amount = document.createTextNode("₹"+priceCalculate.toFixed(2));
+//        // Amount.setAttribute('style', "\"font-weight: 600;\"");
+//        itemAmount.appendChild(Amount);
+//
+//        listItemContainer.appendChild(Amount);
+//        ItemListCheckout.appendChild(listItemContainer);
+}
